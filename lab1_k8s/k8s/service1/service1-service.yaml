@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: service1-service
+spec:
+  type: ClusterIP      # тип доступу до сервісу, ClusterIp - значення за замовчуванням і може бути пропущене
+  ports:
+    - port: 80         # порт по якому можна звератись до сервісу
+      targetPort: 8080 # порт контейнера
+  selector:
+    app: service1      # селектор, всі Pod з даним селектором, будуть підключені до даного сервісу

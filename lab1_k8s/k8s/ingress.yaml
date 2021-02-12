@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: demo-ingress
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /api/service1        # шлях по якому відбувається перенаправлення на сервіс
+            pathType: Prefix           # все, що починається з `/api` буде направлено на сервіс demo-service. Альтернативно можна використовувати `Exact` та `ImplementationSpecific`
+            backend:
+              service:
+                name: service1-service # ім'я сервісу
+                port:
+                  number: 80           # порт на якому запущено сервіс
+          - path: /api/service2
+            pathType: Prefix
+            backend:
+              service:
+                name: service2-service
+                port:
+                  number: 80
