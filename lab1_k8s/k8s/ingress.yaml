@@ -20,3 +20,10 @@ spec:
                 name: service2-service
                 port:
                   number: 80
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: client-service
+                port:
+                  number: 80

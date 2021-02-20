@@ -22,7 +22,7 @@
 
 2. [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) - інтерфейс командного рядка, для роботи з *Kubernetes*
  
-### 2. Реалізація сервісу в *Docker*
+### 2.1 Реалізація сервісу в *Docker*
 
 > Очікується, що до цього курсу всі студенти знайомі з *Docker* та вміють написати простий *Dockerfile*.
 > Тому тут описано лише один важливий момент при створенні *Dockerfile*.  
@@ -104,6 +104,52 @@ service2        latest      f32f76364223   About a minute ago   5.43MB
 <none>          <none>      1588ab6b7f84   3 minutes ago        839MB
 golang          1.15        eba5d0436b0b   2 days ago           839MB
 ```
+
+### 2.2 Реалізація клієнта в *Docker*
+
+В директорії `lab1_k8s/client` знаходиться базовий приклад клієнта створений командою `npx create-react-app client`
+
+Так само, як і в прикладі з сервером, *Dockerfile* для клієнта має бути розбитий на дві частини:
+
+```Dockerfile
+#build
+FROM node:14.15-alpine as build
+WORKDIR /app
+COPY client/package.json ./
+COPY client/package-lock.json ./
+RUN npm install
+COPY client/. ./
+RUN npm run build
+
+#run
+FROM nginx:stable-alpine
+COPY --from=build /app/build /usr/share/nginx/html
+# COPY nginx/nginx.conf /etc/nginx/conf.d/default.conf
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
+```
+
+1. В першій частині виконується збирання проекту. Для цього необхідно використати образ `node`, також встановити всі залежності та зібрати проект.
+2. Клієнт не виконує ніякої серверної роботи, а просто роздає статичні файли (js, html, css, ...)
+   тому як сервер ми можемо використати `nginx` і просто скопіювати, отримані на етапі збирання, файли в директорію `/usr/share/nginx/html`. 
+   Це коренева директорія `nginx` з якої будуть роздаватись файли.
+   
+> За замовчуванням `nginx` буде використовувати свій стандартний файл конфігурацій.
+> Якщо його потрібно налаштувати, можна в директорії з клієнтським кодом створити файл `/client/nginx/nginx.conf`
+> та задати налаштування, які необхідні для вашого додатку. І розкоментувати строку в Dockerfile `COPY nginx/nginx.conf /etc/nginx/conf.d/default.conf`
+
+З директорії `k8s_lab1` створимо кентейнер
+
+`docker build -t client:0.1 -f client/Dockerfile .`
+
+тепер запустивши контейнер, можна побачити стартову сторінку *React*
+
+`docker run -p 8080:80 -t client:0.1`
+
+> Якщо до цього було запущено `eval $(minikube docker-env)` контейнер буде запущено в `minikube`. 
+> Тоді звернутись до нього можна через `echo $(minikube ip):8080`
+> Щоб запустити контейнер локально потрібно змінити контекст *Docker* назад на локальну машину `eval $(minikube docker-env --unset)`
+> Тепер потрібно перезібрати контейнер і після запуску він буде доступний локально `localhost:8080`
 
 ### 3.1 Розгортання додатку. Створення компонент *Pod* та *Deployment*
 
@@ -318,7 +364,7 @@ kubectl proxy
 curl http://localhost:8001/api/v1/namespaces/default/services/service1-service/proxy/api/service1
 ```
 
-Аналогічно можна запустити `service2`
+Аналогічно можна запустити `service2` та клієнт
 
 ##### 4. Налаштування доступу до додатку за допомогою *Ingress*
 
@@ -371,6 +417,7 @@ kubectl apply -f k8s/ingress.yaml
 curl $(minikube ip)/api/service1
 curl $(minikube ip)/api/service2
 ```
+Клієнт можна відкрити в браузері за адресою `$(minikube ip)`
 
 ##### Додатково
 
