@@ -1,0 +1,16 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: service1-virtual
+spec:
+  hosts:
+    - service1-service # ім'я Service до якого застосовується налаштування
+  http:
+    - route:
+        - destination:
+            host: service1-service # ім'я Service до якого застосовується налаштування
+      timeout: 5s
+      retries:
+        attempts: 3
+        retryOn: 5xx
+        perTryTimeout: 5s
