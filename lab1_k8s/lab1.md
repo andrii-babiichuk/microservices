@@ -17,6 +17,9 @@
 
 1. [Minikube](https://kubernetes.io/uk/docs/tasks/tools/install-minikube/) - інструмент який дозволяє запустити *Kubernetes* кластер з одного вузла локально на віртуальній машині.
 
+> При роботі з *minikube* не використовуйте драйвер *docker*, з ним не коректно працює *ingress*.  
+> Перевірені драйвера: для *MacOS* - *virtualbox*, для *Windows* - *hyper-v*, для *Ubuntu* - *kvm*
+
 > Альтернативно можна налаштувати кластер *kubernetes* за допомогою хмарних провайдерів (*Amazon AWS*, *Google Cloud*, *Microsoft Azure*).  
 > В методичці будуть використовуватись приклади з *minikube*
 
