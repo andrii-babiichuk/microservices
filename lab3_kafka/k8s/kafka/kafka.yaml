@@ -17,15 +17,25 @@ spec:
           image: bitnami/kafka:2.7.0-debian-10-r29
           ports:
             - containerPort: 9092
+              name: kafka-client
+            - containerPort: 9093
+              name: kafka-internal
           env:
-            - name: KAFKA_ADVERTISED_HOST_NAME
-              value: kafka
+            - name: MY_POD_IP
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: status.podIP
+            - name: KAFKA_INTER_BROKER_LISTENER_NAME
+              value: INTERNAL
             - name: ALLOW_PLAINTEXT_LISTENER
               value: "yes"
-            - name: KAFKA_CFG_KAFKA_LISTENERS
-              value: "PLAINTEXT://:9092"
-            - name: KAFKA_CFG_KAFKA_ADVERTISED_LISTENERS
-              value: "PLAINTEXT://kafka:9092"
+            - name: KAFKA_CFG_LISTENERS
+              value: 'INTERNAL://:9093,CLIENT://:9092'
+            - name: KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP
+              value: 'INTERNAL:PLAINTEXT,CLIENT:PLAINTEXT'
+            - name: KAFKA_CFG_ADVERTISED_LISTENERS
+              value: 'CLIENT://$(MY_POD_IP):9092,INTERNAL://$(MY_POD_IP):9093'
             - name: KAFKA_CFG_ZOOKEEPER_CONNECT
               value: zookeeper:2181
             - name: KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE
