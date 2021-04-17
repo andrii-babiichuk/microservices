@@ -18,6 +18,12 @@ spec:
           name: service2
           ports:
             - containerPort: 8080
+          resources:
+            limits:
+              memory: 256Mi
+            requests:
+              cpu: 75m
+              memory: 64Mi
 ---
 apiVersion: v1
 kind: Service
