@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service1-deployment
+spec:
+  replicas: 1                      # кількість екземплярів Pod, що буде створено цим Deployment
+  selector:
+    matchLabels:
+      app: service1                # селектор по якому Deployment зв'язаний з Pod
+  template:
+    metadata:
+      labels:
+        app: service1               # мітка Pod по якому вона буде зв'язана з Deployment та Service
+    spec:
+      initContainers:
+        - name: run-migrations
+          image: service1-migrations:0.1
+          command: ["migrate", "-path", "/migrations", "-database",  "$(POSTGRESQL_URL)", "goto", "$(VERSION)"] # CLI команда запуску міграцій, де $(POSTGRESQL_URL) і $(VERSION) змінні середовища
+          env:
+            - name: POSTGRESQL_URL
+              value: "postgres://demo:demo@postgres:5432/demo?sslmode=disable"
+            - name: VERSION
+              value: "20211128095755"
+      containers:
+        - image: service1:0.2      # образ Docker
+          name: service1           # ім'я контейнера
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080  # порт по якому можна звертатись до поди
+          envFrom:
+            - configMapRef:
+                name: service1-config
+            - secretRef:
+                name: service1-secret
