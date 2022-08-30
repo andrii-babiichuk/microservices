@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: service1-config
+data:
+  POSTGRES_DB: demo
+  POSTGRES_HOST: postgres

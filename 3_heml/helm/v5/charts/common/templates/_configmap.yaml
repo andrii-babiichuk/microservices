@@ -1,0 +1,18 @@
+{{- define "common.configmap" -}}
+
+{{- $common := dict "Values" .Values.common -}} # Values з common Chart
+{{- $noCommon := omit .Values "common" -}} # Values з основного Chart
+{{- $overrides := dict "Values" $noCommon -}} # записуємо common Values в змінну Values
+{{- $noValues := omit . "Values" -}} # містить усе крім Values, зокрема Chart, Release
+{{- with merge $noValues $overrides $common -}}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "common.fullname" . }}-config
+data:
+    {{- range $key, $value := .Values.configs }}
+      {{ $key }}: {{ $value }}
+    {{- end }}
+{{- end -}}
+{{- end -}}

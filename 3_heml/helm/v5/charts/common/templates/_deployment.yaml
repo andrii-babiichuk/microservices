@@ -1,0 +1,52 @@
+{{- define "common.deployment" -}}
+
+{{- $common := dict "Values" .Values.common -}} # Values з common Chart
+{{- $noCommon := omit .Values "common" -}} # Values з основного Chart
+{{- $overrides := dict "Values" $noCommon -}} # записуємо common Values в змінну Values
+{{- $noValues := omit . "Values" -}} # містить усе крім Values, зокрема Chart, Release
+{{- with merge $noValues $overrides $common -}}
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "common.fullname" . }}
+spec:
+  replicas: {{ .Values.replicaCount | default 1 }}
+  selector:
+    matchLabels:
+      {{- include "common.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "common.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- if .Values.migrations }}
+      initContainers:
+        - name: {{ .Values.migrations.image.name }}
+          image: {{ .Values.migrations.image.name }}:{{ .Values.migrations.image.tag }}
+          command: [ "migrate", "-path", "/migrations", "-database",  "$(POSTGRESQL_URL)", "goto", "$(VERSION)" ]
+          env:
+            - name: POSTGRESQL_URL
+              value: {{ .Values.migrations.config.POSTGRESQL_URL | quote }}
+            - name: VERSION
+              value: {{ .Values.migrations.config.VERSION | quote }}
+      {{- end }}
+      containers:
+        - image: {{ .Values.image.name }}:{{ .Values.image.tag }}
+          name: {{ .Values.image.name }}
+          imagePullPolicy: Never
+          ports:
+          {{- range .Values.service.ports }}
+            - containerPort: {{ .containerPort }}
+              name: {{ .name }}
+          {{- end}}
+          envFrom:
+            - configMapRef:
+                optional: true
+                name: {{ include "common.fullname" $ }}-config
+            - secretRef:
+                optional: true
+                name: {{ include "common.fullname" $ }}-secret
+{{- end -}}
+{{- end -}}

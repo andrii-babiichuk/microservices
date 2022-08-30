@@ -1,0 +1,15 @@
+replicaCount: 1
+
+image:
+  name: service2
+  tag: 0.1
+
+service:
+  ports:
+    - name: http
+      port: 80
+      containerPort: 8080
+
+ingress:
+  path: /api/service2
+  port: http

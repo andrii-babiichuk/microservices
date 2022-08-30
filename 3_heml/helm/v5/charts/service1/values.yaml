@@ -1,0 +1,29 @@
+image:
+  name: service1
+  tag: 0.2
+
+migrations:
+  image:
+    name: service1-migrations
+    tag: 0.1
+  config:
+    POSTGRESQL_URL: "postgres://demo:demo@postgres:5432/demo?sslmode=disable"
+    VERSION: "20211128095755"
+
+configs:
+  POSTGRES_DB: demo
+  POSTGRES_HOST: postgres
+
+secrets:
+  POSTGRES_USER: "ZGVtbw=="
+  POSTGRES_PASSWORD: "ZGVtbw=="
+
+service:
+  ports:
+    - name: http
+      port: 80
+      containerPort: 8080
+
+ingress:
+  path: /api/service1
+  port: http

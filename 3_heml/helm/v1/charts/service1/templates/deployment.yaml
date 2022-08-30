@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service1-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: service1
+  template:
+    metadata:
+      labels:
+        app: service1
+    spec:
+      imagePullSecrets:
+        - name: regcred
+      initContainers:
+        - name: run-migrations
+          image: service1-migrations:0.1
+          command: ["migrate", "-path", "/migrations", "-database",  "$(POSTGRESQL_URL)", "goto", "$(VERSION)"]
+          env:
+            - name: POSTGRESQL_URL
+              value: "postgres://demo:demo@postgres:5432/demo?sslmode=disable"
+            - name: VERSION
+              value: "20211128095755"
+      containers:
+        - image: service1:0.2
+          name: service1
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: service1-config
+            - secretRef:
+                name: service1-secret
