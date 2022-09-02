@@ -1,0 +1,7 @@
+image:
+  name: producer
+  tag: 0.1
+
+configs:
+  KAFKA_HOST: "kafka:9092"
+  TOPIC: demo

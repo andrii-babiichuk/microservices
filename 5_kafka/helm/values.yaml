@@ -1,0 +1,19 @@
+postgresql:
+  fullnameOverride: postgres
+  postgresqlDatabase: "demo"
+  postgresqlUsername: "demo"
+  postgresqlPassword: "demo"
+  persistence:
+    size: 5Gi
+    mountPath: /var/lib/postgresql/data
+
+kafka:
+  fullnameOverride: kafka
+  numPartitions: 3
+  autoCreateTopicsEnable: false
+  provisioning:
+    enabled: true
+    topics:
+     - name: demo
+  persistence:
+

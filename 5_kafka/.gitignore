@@ -1,0 +1,4 @@
+.idea
+client/node_modules
+client/build
+helm/charts/*.tgz
