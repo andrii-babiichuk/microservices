@@ -11,7 +11,7 @@
 
 ### 2. Додати систему моніторингу
 
-#### 1. Перш ніж додати систему моніторингу необхідно увімкнути `metrics-server` в `minikube`
+#### 2.1. Перш ніж додати систему моніторингу необхідно увімкнути `metrics-server` в `minikube`
 
 ```shell
 minikube addons enable metrics-server
@@ -24,23 +24,17 @@ kubectl top node
 kubectl top pod
 ```
 
-#### 2. Для моніторингу потрібно встановити *Prometheus* та *Grafana*   
+#### 2.2. Для моніторингу потрібно встановити *Prometheus* та *Grafana*   
 
-Спершу створимо *Namespace*, щоб не мішати компоненти моніторингу з основним додатком
+Спершу створимо *Namespace* та встановимо *Prometheus* та *Grafana* за допомогою *Helm*
 
 ```shell
 kubectl create namespace monitoring
-```
-
-Та встановимо *Prometheus* та *Grafana* за допомогою *helm*
-
-```shell
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-
 helm install --namespace monitoring prometheus prometheus-community/kube-prometheus-stack
 ```
 
-#### 3. Відкрити доступ до *Grafana*
+#### 2.3. Відкрити доступ до *Grafana*
 
 Можна за допомогою *Ingress*. Для цього пропишемо окремий хост для *Grafana*
 
@@ -51,16 +45,10 @@ sudo vim /etc/hosts
 192.168.39.76   grafana // де 192.168.39.76 ip мінікуба
 ```
 
-Поміняємо контекст, та встановимо *Ingress* в *Namespace* `monitoring`.
+Встановимо *Ingress* в *Namespace* `monitoring`.
 ```shell
-kubectl config set-context --current --namespace=monitoring
-
 kubectl apply -f grafana_ingress.yaml
 ```
-
-> На демо я замість зміни *Namespace* змінив *Context* `kubectl config use-context monitoring`.
-> Контекст `monitoring` в мене не налаштований, тому були проблеми.
-> В більшості є лише один контекст *minikube* і змінювати його не треба
 
 Інший варіант це просто прокинути порт
 ```shell

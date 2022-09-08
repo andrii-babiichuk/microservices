@@ -89,22 +89,16 @@ average duration: 2.24 seconds
 > При роботі з *minikube* рекомендовано зарезервувати для віртуальної машини, на якій запущено *k8s* *5GB* пам'яті
 > (перевіряв на *4GB*, теж працювало, але якщо дозволяють ресурси, зарезурвуйте більше)
 
-1) Спершу [встановимо клієнт *istioctl*](https://istio.io/latest/docs/setup/getting-started/#download) ([для Windows](https://gist.github.com/VidyasagarMSC/2dcb760297f97220fb5e24621c606d76))
+Спершу встановимо *Istio*, можна за допомогою *Helm*, можна використати [інші способи](https://istio.io/latest/docs/setup/install/).
 
-```shell
-curl -L https://istio.io/downloadIstio | sh -
-
-export PATH=$PWD/istio-1.9.0/bin:$PATH
+```yaml
+kubectl create namespace istio-system
+helm install istio-base istio/base -n istio-system
+helm install istiod istio/istiod -n istio-system --wait
 ```
 
-2) Та [встановимо *istio* в кластер *k8s*](https://istio.io/latest/docs/setup/getting-started/#install)
-
-```shell
-istioctl install --set profile=demo -y
-```
- 
-3) Перед встановленням *Istio* у власну інфраструктуру, рекомендую спробувати демонстраційні додатки, можна використати приклад з [документації](https://istio.io/latest/docs/setup/getting-started/#bookinfo)
-Або приклади, що наведені в даній роботі
+> *Istio* чи інші системи, зокрема, якщо вони мають бути встановлені в окремий *Namespace* чи як окремий *Helm Release* можна також встановлювати за допомогою [helmfile](https://github.com/helmfile/helmfile).
+> В даному курсі цей інструмент не буде розглядатись, але можна розглянути його самостійно.
    
 Якщо виконати команду:
 ```
