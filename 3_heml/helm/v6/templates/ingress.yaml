@@ -1,0 +1,24 @@
+{{- $defaults := . -}}
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: demo-ingress
+spec:
+  rules:
+    - http:
+        paths:
+          {{- range $index, $value := .Values.microservises }}
+          {{- $_ := set $value "nameOverride" $index }}
+          {{- $microservice := dict "Values" $value }}
+          {{- $defaultsCopy := $defaults | deepCopy }}
+          {{- with mergeOverwrite $defaultsCopy $microservice }}
+          - path: {{ $value.ingress.path }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "common.fullname" . }}
+                port:
+                  name: {{ $value.ingress.port }}
+          {{- end -}}
+          {{- end -}}

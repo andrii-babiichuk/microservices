@@ -1,0 +1,49 @@
+{{- $defaults := . -}}
+
+{{- range $index, $value := .Values.microservises }}
+{{- $_ := set $value "nameOverride" $index }}
+{{- $microservice := dict "Values" $value }}
+{{- $defaultsCopy := $defaults | deepCopy }}
+{{- with mergeOverwrite $defaultsCopy $microservice }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "common.fullname" . }}
+spec:
+  replicas: {{ $value.replicaCount | default 1 }}
+  selector:
+    matchLabels:
+      {{- include "common.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "common.selectorLabels" . | nindent 8 }}
+    spec:
+      initContainers:
+      {{- if $value.migrations }}
+        - name: {{ $value.migrations.image.name }}
+          image: {{ $value.migrations.image.name }}:{{ $value.migrations.image.tag }}
+          command: ["migrate", "-path", "/migrations", "-database",  "$(POSTGRESQL_URL)", "goto", "$(VERSION)"]
+          env:
+            - name: POSTGRESQL_URL
+              value: {{ $value.migrations.POSTGRESQL_URL | quote }}
+            - name: VERSION
+              value: {{ $value.migrations.VERSION | quote }}
+      {{- end }}
+      containers:
+        - image: {{ $value.image.name }}:{{ $value.image.tag }}
+          name: {{ $value.image.name }}
+          imagePullPolicy: Never
+          ports:
+          {{- range $value.service.ports }}
+          - containerPort: {{ .containerPort }}
+            name: {{ .name }}
+          {{- end}}
+          envFrom:
+            - configMapRef:
+                name: {{ include "common.fullname" $ }}-config
+            - secretRef:
+                name: {{ include "common.fullname" $ }}-secret
+{{ end }}
+{{ end }}

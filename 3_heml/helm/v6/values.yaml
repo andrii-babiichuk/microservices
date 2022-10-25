@@ -1,0 +1,63 @@
+postgresql:
+  fullnameOverride: postgres
+  postgresqlDatabase: "demo"
+  postgresqlUsername: "demo"
+  postgresqlPassword: "demo"
+  persistence:
+    size: 5Gi
+    mountPath: /var/lib/postgresql/data
+
+configs:
+  POSTGRES_DB: demo
+  POSTGRES_HOST: postgres
+
+secrets:
+  POSTGRES_USER: "ZGVtbw=="
+  POSTGRES_PASSWORD: "ZGVtbw=="
+
+microservises:
+  client:
+    image:
+      name: client
+      tag: 0.1
+    service:
+      ports:
+        - name: http
+          containerPort: 80
+          port: 80
+    ingress:
+      path: /
+      port: http
+
+  service1:
+    replicaCount: 2
+    migrations:
+      image:
+        name: service1-migrations
+        tag: 0.1
+      POSTGRESQL_URL: "postgres://demo:demo@postgres:5432/demo?sslmode=disable"
+      VERSION: "20211128095755"
+    image:
+      name: service1
+      tag: 0.2
+    service:
+      ports:
+      - name: http
+        containerPort: 8080
+        port: 80
+    ingress:
+      path: /api/service1
+      port: http
+
+  service2:
+    image:
+      name: service2
+      tag: 0.1
+    service:
+      ports:
+      - name: http
+        containerPort: 8080
+        port: 80
+    ingress:
+      path: /api/service2
+      port: http
