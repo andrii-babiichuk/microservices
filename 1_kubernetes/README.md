@@ -222,7 +222,7 @@ kubectl apply -f k8s/service1/deployment.yaml
 3) Додати *Service*
 
 ```
-kubectl apply -f k8s/service1/service1-service.yaml
+kubectl apply -f k8s/service1/service.yaml
 ```
 
 Щоб перевірити, що все працює можна створити проксі
