@@ -132,7 +132,7 @@ http://localhost:8001/api/v1/namespaces/default/pods/nginx-565785f75c-k5tmz/prox
 Для того, щоб створити *Service* потрібно виконати наступну команду:
 
 ```shell
-kubectl expose deployment/nginx --type="NodePort" --port 8080
+kubectl expose deployment/nginx --type="NodePort" --port 80
 ```
 
 ```shell
@@ -154,6 +154,10 @@ export NODE_PORT=$(kubectl get services/nginx -o go-template='{{(index .spec.por
 ```shell
 curl $(minikube ip):$NODE_PORT
 ```
+
+> При роботі з `driver=docker` minikube ip не працюватиме, потрібно виконати:
+> `minikube service nginx --url`
+> тут, детальніше: https://minikube.sigs.k8s.io/docs/handbook/accessing/
 
 Також варто звернути увагу, що всі сутності, які ми створили об'єднані однаковими мітками.
 Перевірити це можна виконавши наступні команди:
@@ -222,7 +226,7 @@ kubectl apply -f k8s/service1/deployment.yaml
 3) Додати *Service*
 
 ```
-kubectl apply -f k8s/service1/service1-service.yaml
+kubectl apply -f k8s/service1/service.yaml
 ```
 
 Щоб перевірити, що все працює можна створити проксі
@@ -234,7 +238,7 @@ kubectl proxy
 Та зробити запит на наступний *URL*
 
 ```shell
-curl http://localhost:8001/api/v1/namespaces/default/services/service1-service/proxy/api/service1
+curl http://localhost:8001/api/v1/namespaces/default/services/service1-service/proxy/api/service1/ping
 ```
 
 Аналогічно можна запустити `service2` та клієнт
@@ -244,8 +248,8 @@ curl http://localhost:8001/api/v1/namespaces/default/services/service1-service/p
 На даний момент, має бути запущено 2 сервіси, що доступні по адресах (з увімкненим проксі):
 
 ```shell
-http://localhost:8001/api/v1/namespaces/default/services/service1-service/proxy/api/service1
-http://localhost:8001/api/v1/namespaces/default/services/service2-service/proxy/api/service2
+http://localhost:8001/api/v1/namespaces/default/services/service1-service/proxy/api/service1/ping
+http://localhost:8001/api/v1/namespaces/default/services/service2-service/proxy/api/service2/ping
 ```
 
 Для реальних додатків використовувати `kubectl proxy` не можна, оскільки це відкриває доступ до внутрішньої мережі, і створить проблеми з безпекою.
@@ -289,8 +293,8 @@ kubectl apply -f k8s/service1/ingress.yaml
 Тепер сервіси знаходяться на одному фіксованому порту, і для зовнішніх клієнтів виглядають як один додаток, а не різні його частини
 
 ```
-curl $(minikube ip)/api/service1
-curl $(minikube ip)/api/service2
+curl $(minikube ip)/api/service1/ping
+curl $(minikube ip)/api/service2/ping
 ```
 Клієнт можна відкрити в браузері за адресою `$(minikube ip)`
 
